@@ -1,0 +1,39 @@
+name: ata_project
+version: "1.0"
+services:
+  db:
+    image: postgres:16
+    container_name: atap_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: atap_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  server:
+    image: atap_server:1.0
+    container_name: atap_server
+    build: ./server
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/atap_db
+    ports:
+      - "8000:8000"
+
+  client:
+    image: atap_client:1.0
+    container_name: atap_client
+    build: ./client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+
+volumes:
+  postgres_data:
+
